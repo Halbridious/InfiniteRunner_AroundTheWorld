@@ -1,0 +1,39 @@
+)Player is always "running" around a large sphere
+	Mechanic: Sphere rotates under player, player doesn't move except to "jump
+
+	Complication: Finding this rotation angle after movement, see below
+
+)Player changes over "lanes" on the sphere to avoid obstacles
+	Mechanic: When the player rotates, the sphere under them rotates along with the move
+
+	Constraint: Players cannot be allowed to change lanes too often, to avoid interacting with newly spawned obstacles
+
+	Complication: rotation should always be a set value of degrees parallel to player
+	Copmlication: Each move, mathematically find new angle to rotate the sphere towards player
+
+)Players can jump over some obstacles, others must be avoided.
+	Mechanic: Player moves away from sphere, then back towards it.  Sphere has "gravity"
+	
+	Possible Constraint: Players cannot move laterally during a jump
+	Consideration: Hold to extend jump vs. defined jump time
+
+	Complication: Current camera angle poorly defines which obstacles are "tall" or "short" at the point of interaction
+
+)Obstacles spawn dynamically around the sphere.
+
+	Consideration: Obstacles must be rotated evenly around sphere
+		Further: use empty parent object (parented to sphere).  Rotating it will rotate the child object evenly around a new transform
+		Further: requires use of "pivot" rotation in editor, not "center"
+
+	Complication: Due to spinning nature of movement, determining spawn and expiration will need exploration
+
+)=========CONSIDERED MECHANICS===========(
+
+Sphere expands or contracts, with or without rate of rotation changes, shifting speeds for player and area of vision.
+	
+	Consideration: Doing this would interfere with the spacing in the lanes, and require serious live adjustments if done during gameplay to reposition obstacles
+
+	Consideration: Use as difficulty modifier, or multiple Level selection?
+
+	
+	
