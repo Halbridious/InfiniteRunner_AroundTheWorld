@@ -14,6 +14,8 @@ using UnityEngine;
  * This property checks visiblity among ALL cameras active - including the scene render panel.
  * Align scene to the camera, close the scene, or open as a standalone to avoid this feature-bug
  * 
+ * 
+ * TODO: This isn't working as intended.  We're going to create a kill-field using the colliders at another time
  **/
 
 

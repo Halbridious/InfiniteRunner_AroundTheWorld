@@ -33,6 +33,9 @@ public class Obstacle_Handler : MonoBehaviour {
     [SerializeField]
     private float spawnTime = 2f;
 
+    [SerializeField]
+    private int spawnCount = 2;
+
     private float spawnTimer = 0f;
 
 	// Use this for initialization
@@ -48,7 +51,7 @@ public class Obstacle_Handler : MonoBehaviour {
         if (spawnTimer <= 0 ) {
             //randomly choose which obstacle and spawn it.
             //obstacles have an anchor point in the center of the sphere, and are randomly rotated around that point.
-            for( int i = 0; i < 3; i++ ) {
+            for( int i = 0; i < spawnCount; i++ ) {
                 GameObject obstacle = Instantiate(obstacleTypes[Random.Range(0, obstacleTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-90, (int)90), 0));
                 obstacle.transform.SetParent(gameObject.transform);
                 obstacles.Add(obstacle);
