@@ -31,6 +31,12 @@ public class Obstacle_Handler : MonoBehaviour {
     private GameObject obs2;
 
     [SerializeField]
+    private GameObject player;
+
+    [SerializeField]
+    private GameObject killZone;
+
+    [SerializeField]
     private float spawnTime = 2f;
 
     [SerializeField]
@@ -61,7 +67,17 @@ public class Obstacle_Handler : MonoBehaviour {
             print(spawnTimer);
         }
 
-        //check for death
-
+        //check player collisions
+        for (int i = obstacles.Count -1; i >= 0; i++ ) {
+            //check each obstacle's collision with the player
+            if( player.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
+                print("COLLISION DETECTED");
+                //it's true, so Mark the Obstacle for Death
+            } else if ( killZone.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
+                //mark an obstacle for death
+            }
+        }
+        //check for obstacle death
+        //if dead, remove from list, desroy it, and do any score or player related actiosn
 	}
 }

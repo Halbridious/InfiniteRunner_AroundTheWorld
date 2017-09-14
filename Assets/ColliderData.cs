@@ -17,7 +17,7 @@ public class ColliderData : MonoBehaviour {
     Vector3 halfSize = Vector3.zero;
 
     [SerializeField]
-    private GameObject obstacle;
+    private GameObject hull;
 
     // Update is called once per frame
     void Update() {
@@ -26,14 +26,14 @@ public class ColliderData : MonoBehaviour {
          * This wasn't the original plan, but C'est La Vie
          * After they're rotated by the parent, we want to clear their personal rotations in world space?
          **/
-        obstacle.transform.rotation = Quaternion.identity;
+        hull.transform.rotation = Quaternion.identity;
 
         calcEdges();               
     }
 
     void calcEdges() {
-        mins = obstacle.transform.position - halfSize;
-        maxs = obstacle.transform.position + halfSize;
+        mins = hull.transform.position - halfSize;
+        maxs = hull.transform.position + halfSize;
     }
 
     public bool CheckOverlap( ColliderData other ) {
@@ -49,22 +49,5 @@ public class ColliderData : MonoBehaviour {
 
         return true;
     }
-    /**
-    public void SetCollisionWith( bool isColliding, ColliderAABB other ) {
-        if( isColliding ) {
-            if( !currentOverlaps.Contains(other) ) {
-                currentOverlaps.Add(other);
-
-                OnCollisionStart();
-            }
-        } else {
-            if( currentOverlaps.Contains(other) ) {
-                currentOverlaps.Remove(other);
-
-                OnCollisionEnd();
-            }
-        }
-    }
-    **/
 }
 
