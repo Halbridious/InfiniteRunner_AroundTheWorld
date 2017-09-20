@@ -10,7 +10,7 @@ using UnityEngine;
  *    
  *  TODO:
  *  >Acceleration on jump
- *  >Tuneing
+ *  >Tuning
  **/
 
 public class Player_Mover : MonoBehaviour {
