@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /**
  * 
@@ -111,6 +112,9 @@ public class Obstacle_Handler : MonoBehaviour {
             //check for deaths
             detectPUpsDeath();
         }
+
+        checkScore();
+
     }
 
     #endregion
@@ -154,7 +158,9 @@ public class Obstacle_Handler : MonoBehaviour {
             if( player.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
                 //this obstacle has collided w/ a player, so mark it for death
                 obstacles[i].GetComponent<Object_Death>().isDead = true;
-                //> TODO: KILL THE PLAYER TOO!
+
+                //Kill the player!
+                player.GetComponent <Object_Death>().isDead = true;
             }
             if( killVolume.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
                 //check to see if it's timer is sub-zero
@@ -206,6 +212,16 @@ public class Obstacle_Handler : MonoBehaviour {
                 powerups.Remove(powerups[i]);
             }
         }//end death check
+    }
+
+    //checks for player death and ticks score
+    private void checkScore() {
+        if( !player.GetComponent<Object_Death>().isDead ) {
+            Game_Manager.score += Time.deltaTime;
+        } else {
+            Game_Manager.score = (int)Game_Manager.score;
+            SceneManager.LoadScene("Menu_Scene");
+        }
     }
 
     #endregion
