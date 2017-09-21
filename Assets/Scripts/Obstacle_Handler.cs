@@ -30,7 +30,9 @@ public class Obstacle_Handler : MonoBehaviour {
     List<GameObject> obstacles = new List<GameObject>();
     //a list of active powerups
     List<GameObject> powerups = new List<GameObject>();
-    
+    //a list of powerup types
+    List<GameObject> powerupTypes = new List<GameObject>();
+
     [Tooltip("Obstacle type 1")]
     [SerializeField]
     private GameObject obs1;
@@ -38,6 +40,14 @@ public class Obstacle_Handler : MonoBehaviour {
     [Tooltip("Obstacle type 2")]
     [SerializeField]
     private GameObject obs2;
+
+    [Tooltip("Obstacle type 3")]
+    [SerializeField]
+    private GameObject obs3;
+
+    [Tooltip("Powerup type 1")]
+    [SerializeField]
+    private GameObject pUp;
 
     [Tooltip("The Player Object")]
     [SerializeField]
@@ -65,73 +75,138 @@ public class Obstacle_Handler : MonoBehaviour {
      * Adds obstacle types to the list when the game starts
      **/
     void Start () {
-        if(obs1) obstacleTypes.Add(obs1);
-        if(obs2) obstacleTypes.Add(obs2);
+        if( obs1 ) obstacleTypes.Add(obs1);
+        if( obs2 ) obstacleTypes.Add(obs2);
+        if( obs3 ) obstacleTypes.Add(obs3);
+
+        if( pUp ) powerupTypes.Add(pUp);
 	}
     #endregion
 
-    #region update
+    #region updates
+
     // Update is called once per frame
     void Update () {
         spawnTimer -= Time.deltaTime;
 
         //Spawn objects when the timer hits zero, then reset the Timer
         if (spawnTimer <= 0 ) {
-            for( int i = 0; i < spawnCount; i++ ) {
-                //Randomly pick an obstacle from the list of obstacle types
-                GameObject obstacle = Instantiate(obstacleTypes[Random.Range(0, obstacleTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-90, (int)90), 0));
-                //obs is offset from a pivot object in it's heirarchy.  Rotated behind sphere and randomly along the horizontal
-                //add the object to the sphere's heirarchy
-                obstacle.transform.SetParent(gameObject.transform);
-                //add the object to the list of obstacles
-                obstacles.Add(obstacle);
-            }
-            //reset for next cycle
-            spawnTimer = Random.Range(spawnTime-(spawnTime/2), spawnTime + (spawnTime/2));
-            print(spawnTimer);
-        }
-
-        /**
-         * >TODO: Repeat above loop for powerups
-         **/
+            spawnObs();
+            spawnPUps();
+        }            
     }
 
     private void LateUpdate() {
-        if (obstacles.Count > 0 ) {
-            //check obstacles for collisions (w/ player and kill volume)
-            for( int i = obstacles.Count - 1; i >= 0; i-- ) {
-                //check each obstacle's collision with the player
-                if( player.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
-                    //this obstacle has collided w/ a player, so mark it for death
-                    obstacles[i].GetComponent<Object_Death>().isDead = true;
+        if ( obstacles.Count > 0 ) {
+            //check for collisions (w/ player and kill volume)
+            detectObsCol();
 
-                    //> TODO: KILL THE PLAYER TOO!
+            //check for deaths
+            detectObsDeath();
+        }
 
-                }
-
-                if( killVolume.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
-                    //check to see if it's timer is sub-zero
-                    if( obstacles[i].GetComponent<Object_Death>().lifeDelay < 0 ) {
-                        //it's both in the kill volume AND timed out, so we conk it
-                        obstacles[i].GetComponent<Object_Death>().isDead = true;
-                    }
-                }//end else if
-
-            }//end for obstacles
-
-            //check for obstacle death
-            for( int i = obstacles.Count - 1; i >= 0; i-- ) {
-                //if dead, remove from list, desroy it
-                if( obstacles[i].GetComponent<Object_Death>().isDead ) {
-                    Destroy(obstacles[i]);
-                    obstacles.Remove(obstacles[i]);
-                }
-            }//end death check
-
-            //check player collisions with powerups
+        if ( powerups.Count > 0 ) {
+            //check for collisions
+            detectPUpsCol();
+            //check for deaths
+            detectPUpsDeath();
         }
     }
 
     #endregion
 
+    #region Methods
+
+    //Spawns obstacles on the backside of the sphere
+    private void spawnObs() {
+        for( int i = 0; i < spawnCount; i++ ) {
+            //Randomly pick an obstacle from the list of obstacle types
+            GameObject obstacle = Instantiate(obstacleTypes[Random.Range(0, obstacleTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-80, (int)80), 0));
+            //obs is offset from a pivot object in it's heirarchy.  Rotated behind sphere and randomly along the horizontal
+            //add the object to the sphere's heirarchy
+            obstacle.transform.SetParent(gameObject.transform);
+            //add the object to the list of obstacles
+            obstacles.Add(obstacle);
+        }
+        //reset for next cycle
+        spawnTimer = Random.Range(spawnTime - ( spawnTime / 2 ), spawnTime + ( spawnTime / 2 ));
+    }
+
+    //spawns powerups on the backside of the sphere
+    private void spawnPUps() {
+        //check if you should spawn a powerup (20% chance)
+        float rand = Random.value;
+        if ( rand <= .2f ) {
+            //Randomly pick an obstacle from the list of obstacle types
+            GameObject pUp = Instantiate(powerupTypes[Random.Range(0, powerupTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-80, (int)80), 0));
+            //powerup is offset from a pivot object in it's heirarchy.  Rotated behind sphere and randomly along the horizontal
+            //add the object to the sphere's heirarchy
+            pUp.transform.SetParent(gameObject.transform);
+            //add the object to the list of obstacles
+            powerups.Add(pUp);
+        }        
+    }
+
+    //checks for colliding obstacles
+    private void detectObsCol() {
+        for( int i = obstacles.Count - 1; i >= 0; i-- ) {
+            //check each obstacle's collision with the player
+            if( player.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
+                //this obstacle has collided w/ a player, so mark it for death
+                obstacles[i].GetComponent<Object_Death>().isDead = true;
+                //> TODO: KILL THE PLAYER TOO!
+            }
+            if( killVolume.GetComponent<ColliderData>().CheckOverlap(obstacles[i].GetComponent<ColliderData>()) ) {
+                //check to see if it's timer is sub-zero
+                if( obstacles[i].GetComponent<Object_Death>().lifeDelay < 0 ) {
+                    //it's both in the kill volume AND timed out, so we conk it
+                    obstacles[i].GetComponent<Object_Death>().isDead = true;
+                }
+            }//end else if
+        }//end for obstacles
+    }
+
+    //checks and removes dead obstacles
+    private void detectObsDeath() {
+        for( int i = obstacles.Count - 1; i >= 0; i-- ) {
+            //if dead, remove from list, desroy it
+            if( obstacles[i].GetComponent<Object_Death>().isDead ) {
+                Destroy(obstacles[i]);
+                obstacles.Remove(obstacles[i]);
+            }
+        }//end death check
+    }
+
+    //checks for collisions with powerUps
+    private void detectPUpsCol() {
+        for( int i = powerups.Count - 1; i >= 0; i-- ) {
+            //check each powerups's collision with the player
+            if( player.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) ) {
+                //this powerup has collided w/ a player, so mark it for death
+                powerups[i].GetComponent<Object_Death>().isDead = true;
+                //> TODO: activate POWAH
+            }
+            //check powerups for expiration
+            if( killVolume.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) ) {
+                //check to see if it's timer is sub-zero
+                if( powerups[i].GetComponent<Object_Death>().lifeDelay < 0 ) {
+                    //it's both in the kill volume AND timed out, so we conk it
+                    powerups[i].GetComponent<Object_Death>().isDead = true;
+                }
+            }//end else if
+        }//end for pups
+    }
+
+    //checks and removes dead obstacles
+    private void detectPUpsDeath() {
+        for( int i = powerups.Count - 1; i >= 0; i-- ) {
+            //if dead, remove from list, desroy it
+            if( powerups[i].GetComponent<Object_Death>().isDead ) {
+                Destroy(powerups[i]);
+                powerups.Remove(powerups[i]);
+            }
+        }//end death check
+    }
+
+    #endregion
 }

@@ -15,32 +15,38 @@ using UnityEngine;
 
 public class Sphere_Mover : MonoBehaviour {
 
+    #region variables
+
+    [Tooltip("How quickly the player moves(sphere rotates) laterally")]
     [SerializeField]
     private float horSpeed = 20f;
 
+    [Tooltip("How quickly the sphere moves/rotates vertically")]
     [SerializeField]
     private float verSpeed = 20f;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+    #endregion
 	
 	// Update is called once per frame
 	void Update () {
 
+        //rotate the sphere vertically, simulating the player running "up"
         transform.RotateAround(Vector3.zero, new Vector3(1, 0, 0), verSpeed * Time.deltaTime);
-
+        
+        //Get player input (defined in unity properties)
         float move = Input.GetAxisRaw("Horizontal");
 
+        //if input is positive the player wants to move right
         if (move > 0 ) {
 
+            //rotate the sphere around a vertical axis at the origin, clockwise
             transform.RotateAround(Vector3.zero, new Vector3(0, 1, 0), horSpeed * Time.deltaTime);
 
-        } else if (move < 0 ) {
+        } else if (move < 0 ) {//if input is negative, we go left
+            //rotate sphere around a vertical axis at the origin, counterclockwise
             transform.RotateAround(Vector3.zero, new Vector3(0, 1, 0), -horSpeed * Time.deltaTime);
         } else {
-            //no input, just calculate friction
+            //TODO: no input, just calculate friction (requires acceleration)
         }
 
 	}

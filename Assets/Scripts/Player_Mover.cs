@@ -15,6 +15,8 @@ using UnityEngine;
 
 public class Player_Mover : MonoBehaviour {
 
+    #region variables
+
     [SerializeField]
     private float jumpPower = 50f;
 
@@ -26,6 +28,8 @@ public class Player_Mover : MonoBehaviour {
 
     [SerializeField]
     private bool isGrounded = true;//not currently used for anything
+
+    #endregion
 
     //called on startup
     private void Start() {

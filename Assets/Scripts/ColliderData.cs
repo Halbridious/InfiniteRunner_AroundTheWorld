@@ -12,6 +12,8 @@ using UnityEngine;
 
 public class ColliderData : MonoBehaviour {
 
+    #region variables
+
     public Vector3 maxs = Vector3.zero;
     public Vector3 mins = Vector3.zero;
 
@@ -20,6 +22,8 @@ public class ColliderData : MonoBehaviour {
 
     [SerializeField]
     private GameObject hull;
+
+    #endregion
 
     // Update is called once per frame
     void Update() {
@@ -32,6 +36,8 @@ public class ColliderData : MonoBehaviour {
 
         calcEdges();               
     }
+
+    #region methods
 
     /**
      * Calculates where the edges of the object are by finding the upper left and lower right vertices.
@@ -59,5 +65,7 @@ public class ColliderData : MonoBehaviour {
 
         return true;
     }
+
+    #endregion
 }
 
