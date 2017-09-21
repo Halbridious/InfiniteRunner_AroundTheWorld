@@ -208,9 +208,10 @@ public class Obstacle_Handler : MonoBehaviour {
                 //this powerup has collided w/ a player, so mark it for death
                 powerups[i].GetComponent<Object_Death>().isDead = true;
                 activatePower();
+                break;
             }
-            //check powerups for expiration
-            if( killVolume.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) ) {
+            //if it hasn't collided w/ a player, then check against the kill volume
+            else if( killVolume.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) )  {
                 //check to see if it's timer is sub-zero
                 if( powerups[i].GetComponent<Object_Death>().lifeDelay < 0 ) {
                     //it's both in the kill volume AND timed out, so we conk it
