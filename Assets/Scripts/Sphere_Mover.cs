@@ -18,12 +18,10 @@ public class Sphere_Mover : MonoBehaviour {
     #region variables
 
     [Tooltip("How quickly the player moves(sphere rotates) laterally")]
-    [SerializeField]
-    private float horSpeed = 20f;
+    public float horSpeed = 20f;
 
     [Tooltip("How quickly the sphere moves/rotates vertically")]
-    [SerializeField]
-    private float verSpeed = 20f;
+    public float verSpeed = 20f;
 
     #endregion
 	

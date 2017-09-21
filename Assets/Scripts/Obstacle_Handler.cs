@@ -68,6 +68,12 @@ public class Obstacle_Handler : MonoBehaviour {
     private int spawnCount = 2;
 
     private float spawnTimer = 0f;//the actual counter for the spawn timer
+    private float powerTimer = 0f;//timer for powerups
+    /* Specifies which power is active
+     * 0:none 1:hor speed 2:vert speed 3:score mult
+     */
+    private int power = 0;
+    private int scoreMult = 1;
 
     #endregion
 
@@ -94,10 +100,14 @@ public class Obstacle_Handler : MonoBehaviour {
         if (spawnTimer <= 0 ) {
             spawnObs();
             spawnPUps();
-        }            
+        }
+
+        //if there is an active powerup, tick down the timer
+        if( powerTimer > 0 ) powerTimer -= Time.deltaTime;
     }
 
-    private void LateUpdate() {
+    private void LateUpdate() {    
+
         if ( obstacles.Count > 0 ) {
             //check for collisions (w/ player and kill volume)
             detectObsCol();
@@ -114,6 +124,8 @@ public class Obstacle_Handler : MonoBehaviour {
         }
 
         checkScore();
+
+        if( powerTimer <= 0 && power != 0 ) deactivatePower();
 
     }
 
@@ -138,17 +150,22 @@ public class Obstacle_Handler : MonoBehaviour {
 
     //spawns powerups on the backside of the sphere
     private void spawnPUps() {
-        //check if you should spawn a powerup (20% chance)
-        float rand = Random.value;
-        if ( rand <= .2f ) {
-            //Randomly pick an obstacle from the list of obstacle types
-            GameObject pUp = Instantiate(powerupTypes[Random.Range(0, powerupTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-80, (int)80), 0));
-            //powerup is offset from a pivot object in it's heirarchy.  Rotated behind sphere and randomly along the horizontal
-            //add the object to the sphere's heirarchy
-            pUp.transform.SetParent(gameObject.transform);
-            //add the object to the list of obstacles
-            powerups.Add(pUp);
-        }        
+
+        //only spawn new powerups if there isn't a power active
+        if( powerTimer <= 0 ) {
+
+            //check if you should spawn a powerup (20% chance)
+            float rand = Random.value;
+            if( rand <= .2f ) {
+                //Randomly pick an obstacle from the list of obstacle types
+                GameObject pUp = Instantiate(powerupTypes[Random.Range(0, powerupTypes.Count)], Vector3.zero, Quaternion.Euler(-90, Random.Range((int)-80, (int)80), 0));
+                //powerup is offset from a pivot object in it's heirarchy.  Rotated behind sphere and randomly along the horizontal
+                //add the object to the sphere's heirarchy
+                pUp.transform.SetParent(gameObject.transform);
+                //add the object to the list of obstacles
+                powerups.Add(pUp);
+            }
+        }
     }
 
     //checks for colliding obstacles
@@ -190,7 +207,7 @@ public class Obstacle_Handler : MonoBehaviour {
             if( player.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) ) {
                 //this powerup has collided w/ a player, so mark it for death
                 powerups[i].GetComponent<Object_Death>().isDead = true;
-                //> TODO: activate POWAH
+                activatePower();
             }
             //check powerups for expiration
             if( killVolume.GetComponent<ColliderData>().CheckOverlap(powerups[i].GetComponent<ColliderData>()) ) {
@@ -217,10 +234,72 @@ public class Obstacle_Handler : MonoBehaviour {
     //checks for player death and ticks score
     private void checkScore() {
         if( !player.GetComponent<Object_Death>().isDead ) {
-            Game_Manager.score += Time.deltaTime;
+            Game_Manager.score += Time.deltaTime * scoreMult;
         } else {
             Game_Manager.score = (int)Game_Manager.score;
             SceneManager.LoadScene("Menu_Scene");
+        }
+    }
+
+    //picks a power and starts it moving
+    private void activatePower() {
+
+        //clear the list of powerups, only one active at a time
+        if( powerups.Count > 0 ) {
+            for( int i = powerups.Count - 1; i >= 0; i-- ) {
+                Destroy(powerups[i]);
+                powerups.Remove(powerups[i]);
+            }
+        }
+
+        //activate one of three powers
+        float num = Random.value;
+
+        if (num < .3 ) {
+            //powerup type 1: faster horizontal player movement for a few seconds
+            GetComponent<Sphere_Mover>().horSpeed *= 2;
+            powerTimer = 3f;
+            power = 1;
+        }
+        
+        else if (num >=.3 && num < .6 ) {
+            //powerup 2: slower vertical movement and spawn rate
+            GetComponent<Sphere_Mover>().verSpeed /= 2;
+            powerTimer = 3f;
+            power = 2;
+            spawnTime *= 2;
+        } 
+        
+        else {
+            //powerup 3 doubles the score multiplier
+            scoreMult = 2;
+            power = 3;
+            powerTimer = 5f;
+        }
+    }
+
+    private void deactivatePower() {
+        
+        //reset to default behaviour based on power type
+        switch(  power ) {
+            case 1://faster hor movement
+                power = 0;
+                GetComponent<Sphere_Mover>().horSpeed /= 2;
+                break;
+            case 2://faster ver movement
+                power = 0;
+                spawnTime /= 2;
+                GetComponent<Sphere_Mover>().verSpeed *= 2;
+                break;
+            case 3://score mult
+                power = 0;
+                scoreMult = 1;
+                break;
+            case 0:
+                print("Tried to deActivate a null power!");
+                break;
+            default:
+                break;
         }
     }
 
